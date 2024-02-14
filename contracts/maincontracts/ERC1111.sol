@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 abstract contract ERC1111 {
   event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
   event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-
   event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-
   event ERC20Transfer(
     address indexed from,
     address indexed to,
@@ -17,32 +13,28 @@ abstract contract ERC1111 {
   string public name;
   string public symbol;
   uint8 public decimals;
-  
-  // ERC20
+
+  // erc20
   mapping(address => uint256) private _erc20BalanceOf;
   mapping(address => mapping(address => uint256)) private _allowances;
   uint256 private _totalSupply;
 
-  // ERC721
+  // erc721
   mapping(address => uint256) private _erc721BalanceOf;
   mapping(uint256 => address) private _owners;
   mapping(uint256 => address) private _tokenApprovals;
   mapping(address => mapping(address => bool)) private _operatorApprovals;
-
-  // Array of owned ids in native representation
   mapping(address => uint256[]) internal _owned;
   mapping(uint256 => uint256) internal _ownedIndex;
 
   uint256 public minted;
-
-  bool enableFtTransfer;
 
   constructor(
     string memory name_,
     string memory symbol_,
     uint8 decimals_
   )  {
-    name =      name_;
+    name = name_;
     symbol = symbol_;
     decimals = decimals_;
   }
@@ -69,9 +61,8 @@ abstract contract ERC1111 {
   }
 
   function setApprovalForAll(address operator, bool approved) public virtual {
-      _setApprovalForAll(msg.sender, operator, approved);
+    _setApprovalForAll(msg.sender, operator, approved);
   }
-
   function _setApprovalForAll(
     address owner,
     address operator,
@@ -81,11 +72,9 @@ abstract contract ERC1111 {
     _operatorApprovals[owner][operator] = approved;
     emit ApprovalForAll(owner, operator, approved);
   }
-
   function isApprovedForAll(address owner, address operator) public view virtual returns (bool) {
-    return _operatorApprovals[owner][operator];
+      return _operatorApprovals[owner][operator];
   }
-
   function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
     address owner = ownerOf(tokenId);
     return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender);
@@ -114,6 +103,7 @@ abstract contract ERC1111 {
   function totalSupply() public view virtual returns (uint256) {
     return _totalSupply;
   }
+
   function transferFrom(
     address from,
     address to,
@@ -125,29 +115,23 @@ abstract contract ERC1111 {
       require(to != address(0), "ERC721: transfer to the zero address");
 
       delete _tokenApprovals[amountOrId];
-
       unchecked {
         _erc721BalanceOf[from] -= 1;
         _erc721BalanceOf[to] += 1;
       }
-
       _owners[amountOrId] = to;
 
-      // update from
       uint256 updatedId = _owned[from][_owned[from].length - 1];
       _owned[from][_ownedIndex[amountOrId]] = updatedId;
       _owned[from].pop();
       _ownedIndex[updatedId] = _ownedIndex[amountOrId];
       _owned[to].push(amountOrId);
       _ownedIndex[amountOrId] = _owned[to].length - 1;
-
       emit Transfer(from, to, amountOrId);
     } else {
       uint256 allowed = _allowances[from][msg.sender];
-
       if (allowed != type(uint256).max)
         _allowances[from][msg.sender] = allowed - amountOrId;
-
       _transfer(from, to, amountOrId);
     }
   }
@@ -158,21 +142,17 @@ abstract contract ERC1111 {
   ) public virtual returns (bool) {
     return _transfer(msg.sender, to, amount);
   }
-
   function _transfer(
     address from,
     address to,
     uint256 amount
   ) internal returns (bool) {
-    require(enableFtTransfer, "can not transfer");
     uint256 fromBalance = _erc20BalanceOf[from];
     require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
-
     unchecked {
       _erc20BalanceOf[from] -= amount;
       _erc20BalanceOf[to] += amount;
     }
-
     emit ERC20Transfer(from, to, amount);
     return true;
   }
@@ -183,39 +163,30 @@ abstract contract ERC1111 {
       minted++;
     }
     uint256 tokenId = minted;
-
     unchecked {
       _erc721BalanceOf[to] += 1;
     }
     _owners[tokenId] = to;
     _owned[to].push(tokenId);
     _ownedIndex[tokenId] = _owned[to].length - 1;
-
     emit Transfer(address(0), to, tokenId);
   }
-
   function _burn(address owner) internal virtual {
     uint256 tokenId=_owned[owner][_owned[owner].length - 1];
     _owned[owner].pop();
-
-    // Clear approvals
     delete _tokenApprovals[tokenId];
-
     unchecked {
       _erc721BalanceOf[owner] -= 1;
     }
     delete _owners[tokenId];
     delete _ownedIndex[tokenId];
-
     emit Transfer(owner, address(0), tokenId);
   }
 
   function _mintFT(address account, uint256 amount) internal virtual {
     require(account != address(0), "ERC20: mint to the zero address");
-
     _totalSupply += amount;
     unchecked {
-      // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
       _erc20BalanceOf[account] += amount;
     }
     emit ERC20Transfer(address(0), account, amount);
@@ -228,13 +199,10 @@ abstract contract ERC1111 {
   function _nft_to_ft(uint256 tokenId) internal {
     uint256 unit = _getUnit();
     transferFrom(msg.sender, address(this), tokenId);
-
     _erc20BalanceOf[msg.sender] += unit;
     _totalSupply += unit;
-
     emit ERC20Transfer(address(0), msg.sender, unit);
   }
-
   function _ft_to_nft(uint256 amount) internal {
     uint256 unit = _getUnit();
     uint256 nftAmount = amount / unit;
@@ -255,13 +223,12 @@ abstract contract ERC1111 {
       address from = address(this);
       address to = msg.sender;
       unchecked {
-        _erc721BalanceOf[from] -= 1;
-        _erc721BalanceOf[to] += 1;
+          _erc721BalanceOf[from] -= 1;
+          _erc721BalanceOf[to] += 1;
       }
 
       _owners[tokenId] = to;
 
-      // update from
       uint256 updatedId = _owned[from][_owned[from].length - 1];
       _owned[from][_ownedIndex[tokenId]] = updatedId;
       _owned[from].pop();
