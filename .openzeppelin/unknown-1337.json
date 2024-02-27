@@ -1,0 +1,443 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x44eDFff6Bbbc058fE38f21571F05ec5A00d1A3B0",
+    "txHash": "0x6f8b22c57e4b05974f3c0ffc6e248113d2a4b020ba4dae0d7b3645ca303738f6"
+  },
+  "proxies": [
+    {
+      "address": "0xcf7e06FfD6E1b8a1761D009f84cEd3c18753ceE3",
+      "txHash": "0xddf20788f6cac40d84292edc82ae8bef5df72ee6b4da1b529fbb8ae8509b8c56",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x531F1C86cf8485de10031a2fC05884f34667C1Fe",
+      "txHash": "0xe06bef65372f83e4b565a29a4959665027c8a70566f60048f20ffb4ad29ec765",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "75f8802b0df9cca8eb900671ccc6e8a525e0ade0ffcd65d4f6eb813aefd1d125": {
+      "address": "0xF71fda4a698859Cb02AA8769AA03640DDD86a584",
+      "txHash": "0x04ded4edc9d65ef7f0300e3c774058368e033855a082e86ab580c3718392478a",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\PausableUpgradeable.sol:116"
+          },
+          {
+            "label": "auctionImplementation",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_enum(AuctionType)3907,t_address)",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:24"
+          },
+          {
+            "label": "ongoingAuction",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:25"
+          },
+          {
+            "label": "vickreyAdminParams",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_struct(VickreyParamsAdmin)3921_storage",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:31"
+          },
+          {
+            "label": "englishAdminParams",
+            "offset": 0,
+            "slot": "156",
+            "type": "t_struct(EnglishParamsAdmin)3926_storage",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:32"
+          },
+          {
+            "label": "WETH_ADDRESS",
+            "offset": 0,
+            "slot": "158",
+            "type": "t_address",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:33"
+          },
+          {
+            "label": "isLocked",
+            "offset": 20,
+            "slot": "158",
+            "type": "t_bool",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:288"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_enum(AuctionType)3907": {
+            "label": "enum IAuctionFactory.AuctionType",
+            "members": [
+              "ENGLISHAUCTION721",
+              "ENGLISHAUCTION1155",
+              "VICKREYAUCTION721",
+              "VICKREYAUCTION1155",
+              "DUTCHAUCTION721",
+              "DUTCHAUCTION1155",
+              "SEALEDBIDAUCTIONV1721",
+              "SEALEDBIDAUCTIONV11155",
+              "SEALEDBIDAUCTIONV2721",
+              "SEALEDBIDAUCTIONV21155",
+              "OTHERAUCTION1",
+              "OTHERAUCTION2",
+              "OTHERAUCTION3",
+              "OTHERAUCTION4"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(AuctionType)3907,t_address)": {
+            "label": "mapping(enum IAuctionFactory.AuctionType => address)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(EnglishParamsAdmin)3926_storage": {
+            "label": "struct IAuctionFactory.EnglishParamsAdmin",
+            "members": [
+              {
+                "label": "minimumRemainingTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "feePercent",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(VickreyParamsAdmin)3921_storage": {
+            "label": "struct IAuctionFactory.VickreyParamsAdmin",
+            "members": [
+              {
+                "label": "mininumBidDuration",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "minimumRevealDuration",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "VICKREY_UTILITIES",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    },
+    "5ca2acc4ee488a3dc52a714a81d52e376ac47d0bbf08b4f5a724bac209e745ec": {
+      "address": "0x422183197C9f0977Fd586464f3Ff739c77989a56",
+      "txHash": "0x533df7323281145f3147abfa52fc97cb93decb6d75d5d009a610ee1b6947e111",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\security\\PausableUpgradeable.sol:116"
+          },
+          {
+            "label": "auctionImplementation",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_enum(AuctionType)3880,t_address)",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:24"
+          },
+          {
+            "label": "ongoingAuction",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:25"
+          },
+          {
+            "label": "vickreyAdminParams",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_struct(VickreyParamsAdmin)3894_storage",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:31"
+          },
+          {
+            "label": "englishAdminParams",
+            "offset": 0,
+            "slot": "156",
+            "type": "t_struct(EnglishParamsAdmin)3899_storage",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:32"
+          },
+          {
+            "label": "WETH_ADDRESS",
+            "offset": 0,
+            "slot": "158",
+            "type": "t_address",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:33"
+          },
+          {
+            "label": "isLocked",
+            "offset": 20,
+            "slot": "158",
+            "type": "t_bool",
+            "contract": "AuctionFactory",
+            "src": "contracts\\Marketplace\\AuctionFactory.sol:288"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_enum(AuctionType)3880": {
+            "label": "enum IAuctionFactory.AuctionType",
+            "members": [
+              "ENGLISHAUCTION721",
+              "ENGLISHAUCTION1155",
+              "VICKREYAUCTION721",
+              "VICKREYAUCTION1155",
+              "DUTCHAUCTION721",
+              "DUTCHAUCTION1155",
+              "SEALEDBIDAUCTIONV1721",
+              "SEALEDBIDAUCTIONV11155",
+              "SEALEDBIDAUCTIONV2721",
+              "SEALEDBIDAUCTIONV21155",
+              "OTHERAUCTION1",
+              "OTHERAUCTION2",
+              "OTHERAUCTION3",
+              "OTHERAUCTION4"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_enum(AuctionType)3880,t_address)": {
+            "label": "mapping(enum IAuctionFactory.AuctionType => address)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(EnglishParamsAdmin)3899_storage": {
+            "label": "struct IAuctionFactory.EnglishParamsAdmin",
+            "members": [
+              {
+                "label": "minimumRemainingTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "feePercent",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(VickreyParamsAdmin)3894_storage": {
+            "label": "struct IAuctionFactory.VickreyParamsAdmin",
+            "members": [
+              {
+                "label": "mininumBidDuration",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "minimumRevealDuration",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "VICKREY_UTILITIES",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    }
+  }
+}
