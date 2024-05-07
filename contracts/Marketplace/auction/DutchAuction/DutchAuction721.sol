@@ -24,4 +24,7 @@ contract DutchAuction721 is DutchAuctionBase, Store721 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(4);
   }
+  function bidAuctionFac(address bidder, uint256 amount) internal override {
+    IAuctionFactory(factory).bidAuctionInFactory(4, bidder, amount);
+  }
 }

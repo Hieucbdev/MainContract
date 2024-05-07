@@ -53,7 +53,7 @@ contract NFTCore is
     _requireMinted(tokenId);
 
     string memory baseURI = _baseURI();
-    return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString(), ".json")) : "";
+    return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
   }
 
   /*╔══════════════════════════════╗

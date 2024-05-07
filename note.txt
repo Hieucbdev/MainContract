@@ -1,0 +1,4 @@
+//!!!!!!!
+-> Cần thêm tính năng tạo auction cho ERC1155 mà ở nhiều contracts khác nhau, hiện chỉ cho ở 1 contract
+-> Cần thêm tính năng tạo auction batch 1 auction gồm nhiều NFTs
+

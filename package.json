@@ -7,8 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:ganachechain": "ganache --account=\"0x78a9e6792b45ea79a9faaa9915795992ddf0c82f0e354d6971f7c73fe9b62be7,1000000000000000000000\" --account=\"0x891350a5bfeed0c9399e7dd488b6d3719098b02bd9a709d870a20a2fd2918ab8,1000000000000000000000\"",
     "deployganacheui": "npx hardhat run --network ganacheui ./test/deploy.js",
-    "deploysepolia": "npx hardhat run --network sepolia ./scripts/deploy.js",
-    "updatesepolia": "npx hardhat run --network sepolia ./scripts/update.js"
+    "deploysepolia": "npx hardhat run --network sepolia ./scriptsv2/update.js",
+    "updatesepolia": "npx hardhat run --network sepolia ./scripts/update3.js",
+    "createauction": "npx hardhat run --network sepolia ./scripts/createauction.js"
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +21,8 @@
     "@openzeppelin/contracts": "^4.9.5",
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
     "@openzeppelin/hardhat-upgrades": "^2.4.3",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.5",    
+    "oldethers": "npm:ethers@^5.6.8",
     "lib-auction": "^1.0.9"
   }
 }

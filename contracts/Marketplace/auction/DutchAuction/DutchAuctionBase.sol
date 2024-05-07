@@ -11,22 +11,13 @@ import "../BaseAuction.sol";
 
 abstract contract DutchAuctionBase is Ownable, BaseAuction {
   address factory;
-  uint256 minimumPrice;
-  uint256 startingPrice;
-  uint256 numberOfStep;
-  uint256 stepDuration;
-  address paymentToken;
-  uint256 startingTime;
-  bool isEnded;
-
-  /*╔══════════════════════════════╗
-    ║            EVENTS            ║
-    ╚══════════════════════════════╝*/
-  event AuctionBid(
-    address nftBidder,
-    uint256 bidPrice
-  );
-  event AuctionCancelled(address nftSeller);
+  uint256 public minimumPrice;
+  uint256 public startingPrice;
+  uint256 public numberOfStep;
+  uint256 public stepDuration;
+  address public paymentToken;
+  uint256 public startingTime;
+  bool public isEnded;
 
   /*╔══════════════════════════════╗
     ║          CONSTRUCTOR         ║
@@ -36,6 +27,9 @@ abstract contract DutchAuctionBase is Ownable, BaseAuction {
     address _factory,
     IAuctionFactory.DutchParams memory params
   ) internal {
+    require(startingPrice >= minimumPrice, "Starting price must be greater than minimum price");
+    require(params.numberOfStep > 1, "Invalid number of steps");
+
     _setOwner(operator);
     factory = _factory;
 
@@ -45,8 +39,10 @@ abstract contract DutchAuctionBase is Ownable, BaseAuction {
     stepDuration = params.stepDuration;
     paymentToken = params.paymentToken;
 
-    startingTime = block.timestamp;
+    startingTime = block.timestamp + params.waitBeforeStart;
   }
+  receive() external payable {}
+  function bidAuctionFac(address bidder, uint256 amount) internal virtual;
 
   /*╔══════════════════════════════╗
     ║       CANCEL AUCTION         ║
@@ -56,31 +52,33 @@ abstract contract DutchAuctionBase is Ownable, BaseAuction {
     isEnded = true;
     transferNFT(address(this), _msgSender());
     finalizeFac();
-    emit AuctionCancelled(_msgSender());
   }
 
   /*╔════════════════════════╗
     ║          BUY           ║
     ╚════════════════════════╝*/
   function _buy(uint256 _bidPrice) internal {
-    (uint256 currentPrice,,) = getCurrentStepData();
     require(isEnded == false, "Auction ended");
+    uint currentStep = Math.min(((block.timestamp - startingTime) / stepDuration) + 1, numberOfStep);
+    uint currentPrice = startingPrice - (currentStep - 1) * ((startingPrice - minimumPrice) / (numberOfStep - 1));
     require(_bidPrice >= currentPrice, "Bid price too low");
     transferNFT(address(this), _msgSender());
     sendTokenFromThisContractTo(owner(), currentPrice);
     uint256 refund = _bidPrice - currentPrice;
     if(refund > 0) {
-      sendTokenFromThisContractTo(msg.sender, refund);
+      sendTokenFromThisContractTo(_msgSender(), refund);
     }
-    finalizeFac();
     isEnded = true;
-    emit AuctionBid(msg.sender, _bidPrice);
+    bidAuctionFac(_msgSender(), _bidPrice);
+    finalizeFac();
   }
   function buy(uint256 _bidPrice) external payable nonReentrant {
     require(_msgSender() != owner(), "Auctioneer cannot bid");
+    require(block.timestamp > startingTime, "Auction not started yet");
     if(paymentToken == address(0)){
       _buy(msg.value);
     } else {
+      _payout(_msgSender(), address(this), _bidPrice);
       _buy(_bidPrice);
     }
   }
@@ -110,20 +108,17 @@ abstract contract DutchAuctionBase is Ownable, BaseAuction {
   /*╔══════════════════════════════╗
     ║            GETTERS           ║
     ╚══════════════════════════════╝*/
-  function getCurrentStepData() public view 
-  returns (uint256 currentPrice, uint256 currentRemainingTime, uint256 currentStep) 
-  {
-    currentStep = Math.min(((block.timestamp - startingTime) / stepDuration) + 1, numberOfStep);
-    currentPrice = startingPrice - (currentStep - 1) * ((startingPrice - minimumPrice) / numberOfStep);
-    currentRemainingTime = stepDuration - ((block.timestamp - startingTime) % stepDuration);
-  }
-  // Để frontend lấy progress = time elapsed / (numberOfStep*stepDuration)
-  function getTimeElapsed() external view returns (uint256) {
-    return (block.timestamp - startingTime);
-  }
+  // Formula for frontend
+  // function getCurrentStepData() public view 
+  // returns (uint256 currentPrice, uint256 currentRemainingTime, uint256 currentStep) 
+  // {
+  //   currentStep = Math.min(((block.timestamp - startingTime) / stepDuration) + 1, numberOfStep);
+  //   currentPrice = startingPrice - (currentStep - 1) * ((startingPrice - minimumPrice) / numberOfStep);
+  //   currentRemainingTime = stepDuration - ((block.timestamp - startingTime) % stepDuration);
+  // }
   function getAuctionInfo() external view 
-  returns(uint256, uint256, uint256, uint256, address, uint256, bool) {
+  returns(uint256, uint256, uint256, uint256, address, uint256, bool, address) {
     return (
-      minimumPrice, startingPrice, numberOfStep, stepDuration, paymentToken, startingTime, isEnded);
+      minimumPrice, startingPrice, numberOfStep, stepDuration, paymentToken, startingTime, isEnded, owner());
   }
 }

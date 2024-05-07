@@ -23,30 +23,6 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
   uint256 public currentBid;
   uint256 public bidSteps;
   bool public isCanceled;
-
-  /*╔══════════════════════════════╗
-    ║            EVENTS            ║
-    ╚══════════════════════════════╝*/
-  event AuctionBid(
-    address nftSeller,
-    address currentBidder,
-    uint256 bidPrice
-  );
-  event AuctionCompleted(
-    address nftAuctioneer,
-    address nftBuyer,
-    uint256 hammerPrice
-  );
-  event AuctionCancelled(address nftSeller);
-  event EndTimeUpdated(
-    uint256 oldEndTime,
-    uint256 newEndTime
-  );
-  event PriceUpdated(
-    address indexed nftSeller,
-    uint256 oldPrice,
-    uint256 newPrice
-  );
   
   /*╔══════════════════════════════╗
     ║          CONSTRUCTOR         ║
@@ -60,18 +36,22 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
     factory = _factory;
     paymentToken = params.paymentToken;
     startingBid = params.startingBid;
-    currentBid = startingBid;
-    startTime = block.timestamp;
-    endTime = block.timestamp + params.bidDuration;
-    bidStepPercent = params.bidStepPercent;
+    startTime = block.timestamp + params.waitBeforeStart;
+    endTime = startTime + params.bidDuration;
     (
       uint256 _minimumRemainingTime,
-      uint256 feePercent
+      uint256 feePercent,
+      uint256 bidStepPercent1
     ) = IAuctionFactory(factory).englishAdminParams();
     feePercentage = feePercent;
+    bidStepPercent = bidStepPercent1;
     minimumRemainingTime = _minimumRemainingTime;
     require(startingBid > 0 && params.bidDuration > 0 && bidStepPercent > 0, "Invalid params");
   }
+  receive() external payable {}
+
+  function updateAuctionFac() internal virtual;
+  function bidAuctionFac(address bidder, uint256 amount) internal virtual;
 
   /*╔══════════════════════════════╗
     ║       CANCEL AUCTION         ║
@@ -81,7 +61,6 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
     isCanceled = true;
     transferNFT(address(this), _msgSender());
     finalizeFac();
-    emit AuctionCancelled(_msgSender());
   }
 
   function _editAuction(uint256 _newPrice, uint256 _newDuration) internal {
@@ -89,11 +68,14 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
       require(startTime + _newDuration > block.timestamp, "New duration too short");
       endTime = startTime + _newDuration;
     }
-    uint256 oldPrice = startingBid;
-    startingBid = _newPrice;
-    currentBid = _newPrice;
-    emit PriceUpdated(_msgSender(), oldPrice, _newPrice);
+    if(_newPrice!= 0){
+      startingBid = _newPrice;
+      currentBid = _newPrice;
+    }
+    updateAuctionFac();
   }
+  //!!!!!! Nên cho phép edit cả loại token nữa
+  //!!!!!! Nên mở rộng cho phép edit miễn là chưa có ai bid, kể cả đã end, khi đó người dùng nhập vào thời gian đích để nới rộng endTime ra cho auction
   function editAuction(uint256 _newPrice, uint256 _newDuration) external nonReentrant onlyOwner {
     require(bidSteps == 0, "Cannot edit ongoing auction");
     require(block.timestamp < endTime, "Cannot edit ended auction");
@@ -137,15 +119,14 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
     bidSteps += 1;
 
     if (endTime - block.timestamp < minimumRemainingTime) {
-      uint256 oldEndTime = endTime;
       endTime = block.timestamp + minimumRemainingTime;
-      emit EndTimeUpdated(oldEndTime, endTime);
     }
-    emit AuctionBid(_msgSender(), currentBidder, _bidPrice);
+    bidAuctionFac(currentBidder, _bidPrice);
   }
 
   function makeBid(uint256 _bidPrice) external payable nonReentrant {
     require(_msgSender() != owner(), "Auctioneer cannot bid");
+    require(block.timestamp > startTime, "Auction has not started yet");
     if(paymentToken == address(0)){
       _makeBid(msg.value);
     } else {
@@ -170,7 +151,6 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
 
     transferNFT(address(this), currentBidder);
     finalizeFac();
-    emit AuctionCompleted(owner(), currentBidder, hammerPrice);
   }
 
   /*  ╔═════════════════════════╗
@@ -201,19 +181,12 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
   function isAuctionOngoing() public view returns (bool) {
     return block.timestamp <= endTime && isCanceled == false;
   }
-  function getRemainingTime() public view returns (uint256) {
-    if (block.timestamp > endTime) {
-      return 0;
-    } else {
-      return endTime - block.timestamp;
-    }
-  }
   function getAuctionInfo() external view
-  returns (address, uint256, address, uint256, uint256, uint256, uint256, uint256, address) 
+  returns (address, uint256, address, uint256, uint256, uint256, uint256, address) 
   {
     return (
       owner(), startingBid, currentBidder, currentBid, startTime, 
-      endTime, bidSteps, getRemainingTime(), paymentToken
+      endTime, bidSteps, paymentToken
     );
   }
 }

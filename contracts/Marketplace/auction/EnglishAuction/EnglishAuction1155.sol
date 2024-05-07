@@ -26,4 +26,10 @@ contract EnglishAuction1155 is EnglishAuctionBase, ERC1155Holder, Store1155 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(1);
   }
+  function updateAuctionFac() internal override {
+    IAuctionFactory(factory).updateAuctionInFactory(1);
+  }
+  function bidAuctionFac(address bidder, uint256 amount) internal override {
+    IAuctionFactory(factory).bidAuctionInFactory(1, bidder, amount);
+  }
 }

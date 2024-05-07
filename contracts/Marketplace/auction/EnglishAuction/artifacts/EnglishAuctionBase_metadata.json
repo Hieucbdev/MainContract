@@ -1,0 +1,423 @@
+{
+	"compiler": {
+		"version": "0.8.24+commit.e11b9ed9"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint8",
+						"name": "version",
+						"type": "uint8"
+					}
+				],
+				"name": "Initialized",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "bidStepPercent",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "bidSteps",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "cancelAuction",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "currentBid",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "currentBidder",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_newPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_newDuration",
+						"type": "uint256"
+					}
+				],
+				"name": "editAuction",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "endTime",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "factory",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "feePercentage",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "finalizeAuction",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getAuctionInfo",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "isAuctionOngoing",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "isCanceled",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_bidPrice",
+						"type": "uint256"
+					}
+				],
+				"name": "makeBid",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "minimumRemainingTime",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "paymentToken",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "startTime",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "startingBid",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
+			}
+		],
+		"devdoc": {
+			"events": {
+				"Initialized(uint8)": {
+					"details": "Triggered when the contract has been initialized or reinitialized."
+				}
+			},
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/Marketplace/auction/EnglishAuction/EnglishAuctionBase.sol": "EnglishAuctionBase"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/proxy/utils/Initializable.sol": {
+			"keccak256": "0x3d6069be9b4c01fb81840fb9c2c4dc58dd6a6a4aafaa2c6837de8699574d84c6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://720d6bb56ea0c4ef781c0bd65c5bd0541f5a46100163b2587170f97658d2deed",
+				"dweb:/ipfs/QmTS2biLVPrv8CeeXCaKmkFxonMiRvc1LxiYBRYDAJHQUS"
+			]
+		},
+		"@openzeppelin/contracts/security/ReentrancyGuard.sol": {
+			"keccak256": "0xa535a5df777d44e945dd24aa43a11e44b024140fc340ad0dfe42acf4002aade1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://41319e7f621f2dc3733511332c4fd032f8e32ad2aa7fd6f665c19741d9941a34",
+				"dweb:/ipfs/QmcYR3bd862GD1Bc7jwrU9bGxrhUu5na1oP964bDCu2id1"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x287b55befed2961a7eabd7d7b1b2839cbca8a5b80ef8dcbb25ed3d4c2002c305",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://bd39944e8fc06be6dbe2dd1d8449b5336e23c6a7ba3e8e9ae5ae0f37f35283f5",
+				"dweb:/ipfs/QmPV3FGYjVwvKSgAXKUN3r9T9GwniZz83CxBpM7vyj2G53"
+			]
+		},
+		"@openzeppelin/contracts/utils/Address.sol": {
+			"keccak256": "0x006dd67219697fe68d7fbfdea512e7c4cb64a43565ed86171d67e844982da6fa",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2455248c8ddd9cc6a7af76a13973cddf222072427e7b0e2a7d1aff345145e931",
+				"dweb:/ipfs/QmfYjnjRbWqYpuxurqveE6HtzsY1Xx323J428AKQgtBJZm"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0xa92e4fa126feb6907daa0513ddd816b2eb91f30a808de54f63c17d0e162c3439",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a367861093b74443b137564d3f3c472f70bcf114739e62059c939f25e315706c",
+				"dweb:/ipfs/Qmd7JMpcxD9RuQjK3uM3EzJUgSqdN8vzp8eytEiuwxQJ6h"
+			]
+		},
+		"contracts/Marketplace/IAuctionFactory.sol": {
+			"keccak256": "0x009be1bf2449996a4c70fdc53dc9d8541e881ecd02817f4771c4961e7800b03d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://daf1003db6f6f0564ab40f822959ebcc16b7ee422e03548ab06670844f73d97e",
+				"dweb:/ipfs/QmZFFHrA52ZQdJKLVhd9LEQ2rrzzxLKktBraGbnq4iLDx3"
+			]
+		},
+		"contracts/Marketplace/auction/BaseAuction.sol": {
+			"keccak256": "0x648f55bf6e9ebb7fd7bb683e8f7489677a8c7794eda9edccc7eae5e6a9ba7171",
+			"license": "Unlicense",
+			"urls": [
+				"bzz-raw://f6683e5f40cc10ebca3ef23aed251a811f7c7b2b4394849d73ed7026688a6087",
+				"dweb:/ipfs/QmNiS2VSUQsY91gFHV74mRKophSLK73Ys3YEBrjnRX7zbK"
+			]
+		},
+		"contracts/Marketplace/auction/EnglishAuction/EnglishAuctionBase.sol": {
+			"keccak256": "0x02af7a9aa81e6eb06f1425abc837a8456c1a7625578ee8c52b5d0d1e01275090",
+			"license": "Unlicense",
+			"urls": [
+				"bzz-raw://05161548422eddfda73f62f84ed492c43c209d3d93439e4299d1b0e5e8c8e49f",
+				"dweb:/ipfs/QmNSFGV1HJdnnd86DAtiTJ57gpHm5Yq2iD9hLSaik3iPgy"
+			]
+		},
+		"contracts/Marketplace/utils/IWETH.sol": {
+			"keccak256": "0x70445e7a012be7506409e1ef6859e8698830379ab9b8f1db358d2a6e075afe57",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://009e94f592e03522101cd6d2d91daa564616ba0676060d61179db6eecdb7cc94",
+				"dweb:/ipfs/QmfQU55aW5yoEXWuUMDEgPVM8xzaYsJn5DPTaNPmMHtCyQ"
+			]
+		},
+		"contracts/Marketplace/utils/Ownable.sol": {
+			"keccak256": "0xa0743078ef401c9ad4bff3faabadb750e873073de0d89c393d826969b3dfd7c3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://21c0ea97900eb7cb9fdd117609e2e921b504d646f782b80c954bd9df36844675",
+				"dweb:/ipfs/QmXR71Fgk73HTwaJzwipV357EA5rNGRPr4imD9twygUdR2"
+			]
+		},
+		"contracts/Marketplace/utils/TransferETHLib.sol": {
+			"keccak256": "0x0e89bb6948893644c1720eceb7d4b76aa0aa909e7fa6b0240e1ba855dff19980",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1d06e770087032a3eca6b6ac2f2bcf12c8baa1a06eb74d2fec073754187f854f",
+				"dweb:/ipfs/QmQcdZjAreq91yPFCEwy8UmZ1cRySXCtiKZPfwAAxJe4ax"
+			]
+		}
+	},
+	"version": 1
+}

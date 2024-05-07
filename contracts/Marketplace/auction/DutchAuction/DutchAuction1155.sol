@@ -26,4 +26,7 @@ contract DutchAuction1155 is DutchAuctionBase, ERC1155Holder, Store1155 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(5);
   }
+  function bidAuctionFac(address bidder, uint256 amount) internal override {
+    IAuctionFactory(factory).bidAuctionInFactory(5, bidder, amount);
+  }
 }

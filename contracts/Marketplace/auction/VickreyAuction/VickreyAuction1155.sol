@@ -25,4 +25,10 @@ contract VickreyAuction1155 is VickreyAuctionBase, ERC1155Holder, Store1155 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(3);
   }
+  function startRevealFac() internal override {
+    IAuctionFactory(factory).startRevealAuctionInFactory(3);
+  }
+  function revealAuctionFac(address revealer, uint256 actualAmount) internal override {
+    IAuctionFactory(factory).revealAuctionInFactory(3, revealer, actualAmount);
+  }
 }

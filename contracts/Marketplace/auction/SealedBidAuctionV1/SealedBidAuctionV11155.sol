@@ -24,4 +24,10 @@ contract SealedBidAuctionV11155 is SealedBidAuctionV1Base, ERC1155Holder, Store1
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(7);
   }
+  function revealAuctionFac(address revealer, uint256 actualAmount) internal override {
+    IAuctionFactory(factory).revealAuctionInFactory(7, revealer, actualAmount);
+  }
+  function startRevealFac() internal override {
+    IAuctionFactory(factory).startRevealAuctionInFactory(7);
+  }
 }

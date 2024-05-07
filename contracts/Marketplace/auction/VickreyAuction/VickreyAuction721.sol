@@ -23,4 +23,10 @@ contract VickreyAuction721 is VickreyAuctionBase, Store721 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(2);
   }
+  function startRevealFac() internal override {
+    IAuctionFactory(factory).startRevealAuctionInFactory(2);
+  }
+  function revealAuctionFac(address revealer, uint256 actualAmount) internal override {
+    IAuctionFactory(factory).revealAuctionInFactory(2, revealer, actualAmount);
+  }
 }

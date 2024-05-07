@@ -24,4 +24,10 @@ contract EnglishAuction721 is EnglishAuctionBase, Store721 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(0);
   }
+  function updateAuctionFac() internal override {
+    IAuctionFactory(factory).updateAuctionInFactory(0);
+  }
+  function bidAuctionFac(address bidder, uint256 amount) internal override {
+    IAuctionFactory(factory).bidAuctionInFactory(0, bidder, amount);
+  }
 }

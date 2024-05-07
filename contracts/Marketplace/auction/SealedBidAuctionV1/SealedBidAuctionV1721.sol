@@ -23,4 +23,10 @@ contract SealedBidAuctionV1721 is SealedBidAuctionV1Base, Store721 {
   function finalizeFac() internal override {
     IAuctionFactory(factory).finalizeAuctionInFactory(6);
   }
+  function revealAuctionFac(address revealer, uint256 actualAmount) internal override {
+    IAuctionFactory(factory).revealAuctionInFactory(6, revealer, actualAmount);
+  }
+  function startRevealFac() internal override {
+    IAuctionFactory(factory).startRevealAuctionInFactory(6);
+  }
 }

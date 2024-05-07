@@ -10,8 +10,8 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../BaseAuction.sol";
 
 abstract contract VickreyAuctionBase is BaseAuction {
-  address owner;
-  IAuctionFactory public factory;
+  address public owner;
+  IAuctionFactory factory;
 
   uint256 public basePrice;
   uint256 public revealDuration;
@@ -25,21 +25,6 @@ abstract contract VickreyAuctionBase is BaseAuction {
   uint128 public topBid;
   uint128 public sndBid;
   bool public isClaimed;
-
-  /*╔═══════════════════════╗
-    ║        EVENTS         ║
-    ╚═══════════════════════╝*/
-  event RevealStarted();
-  event BidRevealed(
-    address indexed topBidder,
-    uint256 topBid,
-    uint256 sndBid,
-    address indexed bidder,
-    uint256 bid
-  );
-  event WinClaimed(address indexed winner, uint256 paidBid, uint256 refund);
-  event Slashed(address indexed bidder, uint256 paidBid, uint256 slashed);
-  event ClaimNoBidder();
 
   /*╔═══════════════════════╗
     ║        ERRORS         ║
@@ -89,6 +74,8 @@ abstract contract VickreyAuctionBase is BaseAuction {
     bidEndTime = block.timestamp + params.bidDuration;
     utilities = IVickreyUtilities(VICKREY_UTILITIES);
   }
+  function startRevealFac() internal virtual;
+  function revealAuctionFac(address revealer, uint256 actualAmount) internal virtual;
 
   /*╔══════════════════════╗
     ║       REVEEAL        ║
@@ -107,7 +94,7 @@ abstract contract VickreyAuctionBase is BaseAuction {
       revealBlockNum = block.number - 1;
     }
     revealStartTime = uint(block.timestamp);
-    emit RevealStarted();
+    startRevealFac();
   }
 
   // Not first reveal and being the highest
@@ -157,9 +144,6 @@ abstract contract VickreyAuctionBase is BaseAuction {
       return bidAddr;
     }
     uint256 bidderRefund = totalBid - actualBid;
-    uint128 topBidCached = topBid;
-    uint128 sndBidCached = sndBid;
-    address topBidderCached = topBidder;
     
     if (actualBid > topBid) {
       TransferETHLib.transferETH(topBidder, topBid, factory.WETH_ADDRESS());
@@ -174,14 +158,7 @@ abstract contract VickreyAuctionBase is BaseAuction {
     if(bidderRefund > 0) {
       TransferETHLib.transferETH(_bidder, bidderRefund, factory.WETH_ADDRESS());
     }
-
-    emit BidRevealed(
-      topBidderCached, // old val
-      topBidCached, // old val
-      sndBidCached, // old val
-      _bidder, // new val
-      actualBid // new val
-    );
+    revealAuctionFac(_bidder, actualBid);
   }
 
   // First reveal or reveal but not highest bidder
@@ -210,36 +187,24 @@ abstract contract VickreyAuctionBase is BaseAuction {
       (totalBid, bidAddr) = takeCreate2(salt);
     }
     uint256 bidderRefund;
-    uint128 topBidCached;
-    uint128 sndBidCached;
     uint256 actualBid = Math.min(_bid, totalBid);
     if(actualBid < basePrice){
       TransferETHLib.transferETH(_bidder, actualBid, factory.WETH_ADDRESS());
       return bidAddr;
     }
 
+    //!!! Mới fix là k lưu nếu là second vì sndprice cũng phải check
     if(topBidder != address(0)) {
-      require(actualBid <= topBid, "You may be the highest bidder");
+      require(actualBid <= sndBid, "You may be the highest bidder or second highest bidder");
       bidderRefund = totalBid;
-      topBidCached = topBid;
-      sndBidCached = sndBid;
-      if (actualBid > sndBid) sndBid = uint128(actualBid);
     } else {
       bidderRefund = totalBid - actualBid;
-      topBidCached = topBid;
-      sndBidCached = sndBid;
       topBidder = _bidder;
       topBid = uint128(actualBid);
     }
 
     TransferETHLib.transferETH(_bidder, bidderRefund, factory.WETH_ADDRESS());
-    emit BidRevealed(
-      topBidder, 
-      topBidCached, 
-      sndBidCached, 
-      _bidder, 
-      actualBid 
-    );
+    revealAuctionFac(_bidder, actualBid);
   }
 
   // !!! Not support server reveal batch yet
@@ -278,7 +243,6 @@ abstract contract VickreyAuctionBase is BaseAuction {
       TransferETHLib.transferETH(owner, slashed, factory.WETH_ADDRESS());
       TransferETHLib.transferETH(_bidder, totalBid - slashed, factory.WETH_ADDRESS());
     }
-    emit Slashed(_bidder, totalBid, slashed);
   }
 
   /*
@@ -320,17 +284,19 @@ abstract contract VickreyAuctionBase is BaseAuction {
     }
   }
 
+
+  //!!!! Fix để k cho gọi claim win khi còn chưa reveal
   function ownerClaimNoBidder() public returns(bool){
-    if (revealStartTime + revealDuration > block.timestamp) revert RevealNotOver();
+    if (revealStartTime != 0 && revealStartTime + revealDuration > block.timestamp) revert RevealNotOver();
     if(topBid == 0) {
       transferNFT(address(this), owner);
       finalizeFac();
-      emit ClaimNoBidder();
       return true;
     }
     return false;
   }
   function claimWin() external nonReentrant {
+    require(isClaimed == false, "Auction already claimed");
     isClaimed = true;
     if(ownerClaimNoBidder()) return;
     transferNFT(address(this), topBidder);
@@ -345,7 +311,6 @@ abstract contract VickreyAuctionBase is BaseAuction {
       TransferETHLib.transferETH(topBidder, refund, factory.WETH_ADDRESS());
     }
     finalizeFac();
-    emit WinClaimed(topBidder, paidBid, refund);
   }
 
   /*╔═══════════════════════╗
@@ -397,61 +362,59 @@ abstract contract VickreyAuctionBase is BaseAuction {
     }
   }
 
-  function getRemainingBidTime() public view returns(uint256) {
-    return bidEndTime > block.timestamp ? bidEndTime - block.timestamp : 0;
-  }
-  function getRemainingRevealTime() public view returns(uint256) {
-    if(revealStartTime <= 0) {
-      return 0;
-    }
-    if(revealStartTime + revealDuration > block.timestamp){
-      return revealStartTime + revealDuration - block.timestamp;
-    }
-    return 0;
-  }
-
-  // Edge case: user reveal and still send ether to create2 contract, it will depend
-  function isFirstOrHighest(
-    address _bidder,
-    uint256 _bid,
-    bytes32 _subSalt
-  ) external view returns(bool) {
-    if(topBid == 0) {
-      return true;
-    }
-    uint256 bidPrice = getEstimatedBidPrice(_bidder, _bid, _subSalt);
-    if(bidPrice <= topBid && bidPrice > 0) {
-      return true;
-    }
-    return false;
-  }
-  // Edge case: After user reveal, always come to 0, but sending ether to create2 contract, it will depends
-  function getEstimatedBidPrice(
-    address _bidder,
-    uint256 _bid,
-    bytes32 _subSalt
-  ) public view returns(uint256) {
-    (, address depositAddr) = getBidDepositAddr(
-      _bidder,
-      _bid,
-      _subSalt
-    );
-    return Math.min(_bid, address(depositAddr).balance);
-  }
-
   function getAuctionInfo() external view
   returns (address, uint256, uint256, uint256, uint256, uint256, address, uint256, uint256, bool) {  
     return (
       owner,
       basePrice,
       revealDuration,
-      getRemainingBidTime(),
-      getRemainingRevealTime(),
+      bidEndTime,
+      revealStartTime,
       revealBlockNum,
       topBidder,
       topBid,
       sndBid,
-      isClaimed
+      isClaimed //!!!! Bỏ claim đi
     );
   }
+  // // Edge case: user reveal and still send ether to create2 contract, it will depend
+  // function isFirstOrHighest(
+  //   address _bidder,
+  //   uint256 _bid,
+  //   bytes32 _subSalt
+  // ) external view returns(bool) {
+  //   if(topBid == 0) {
+  //     return true;
+  //   }
+  //   uint256 bidPrice = getEstimatedBidPrice(_bidder, _bid, _subSalt);
+  //   if(bidPrice <= topBid && bidPrice > 0) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
+  // // Edge case: After user reveal, always come to 0, but sending ether to create2 contract, it will depends
+  // function getEstimatedBidPrice(
+  //   address _bidder,
+  //   uint256 _bid,
+  //   bytes32 _subSalt
+  // ) public view returns(uint256) {
+  //   (, address depositAddr) = getBidDepositAddr(
+  //     _bidder,
+  //     _bid,
+  //     _subSalt
+  //   );
+  //   return Math.min(_bid, address(depositAddr).balance);
+  // }
+  // function getRemainingBidTime() public view returns(uint256) {
+  //   return bidEndTime > block.timestamp ? bidEndTime - block.timestamp : 0;
+  // }
+  // function getRemainingRevealTime() public view returns(uint256) {
+  //   if(revealStartTime <= 0) {
+  //     return 0;
+  //   }
+  //   if(revealStartTime + revealDuration > block.timestamp){
+  //     return revealStartTime + revealDuration - block.timestamp;
+  //   }
+  //   return 0;
+  // }
 }

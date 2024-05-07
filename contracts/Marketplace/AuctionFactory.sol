@@ -24,10 +24,6 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
   mapping(AuctionType => address) public auctionImplementation;
   mapping(address => bool) public ongoingAuction;
 
-  // Tạm thời chưa cần cái này cho frontend, tương lai frontend cần thì thêm vào
-  // mapping(address => EnumerableSet.AddressSet) auctionByUser;
-  // mapping(address => EnumerableSet.AddressSet) auctionByCollection;
-
   VickreyParamsAdmin override public vickreyAdminParams;
   EnglishParamsAdmin override public englishAdminParams;  
   address public WETH_ADDRESS;
@@ -55,7 +51,7 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
   /*╔══════════════════════════════╗
     ║         MAIN LOGIC           ║
     ╚══════════════════════════════╝*/
-  function innerCreateAuction(AuctionType, address, bytes memory) external pure {
+  function innerCreateAuction(AuctionType, bytes memory) external pure {
     revert NotCallable();
   }
   // ERC721
@@ -197,40 +193,40 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
     }
   }
 
-  // ERC1155
-  function onERC1155Received(
-    address operator,
-    address,
-    uint256 id,
-    uint256 value,
-    bytes memory _data
-  ) public whenNotPaused returns (bytes4) {
-    {
-      bytes4 dataSelector;
-      assembly {
-        dataSelector := mload(add(_data, 0x20))
-      }
-      if (dataSelector != AuctionFactory.innerCreateAuction.selector)
-        revert InvalidReceiveData();
-    }
-    assembly {
-      mstore(add(_data, 0x04), sub(mload(_data), 0x04))
-      _data := add(_data, 0x04)
-    }
-    (AuctionType auctionType, bytes memory auctionData) = abi.decode(_data, (AuctionType, bytes));
-    address[] memory nftAddresses = new address[](1);
-    uint[] memory nftIds = new uint[](1);
-    uint[] memory nftValues = new uint[](1);
-    nftAddresses[0] = msg.sender;
-    nftIds[0] = id;
-    nftValues[0] = value;
-    address newAuction = createNewAuction1155(auctionType, auctionData, operator, nftAddresses, nftIds, nftValues);
-    ongoingAuction[newAuction] = true;
-    emit AuctionCreated(newAuction, uint256(auctionType));
-    IERC1155(msg.sender).safeTransferFrom(address(this), newAuction, id, value, "");
+  // ERC1155 //!!!! Có thể xóa hàm này, chỉ dùng transfer batch
+  // function onERC1155Received(
+  //   address operator,
+  //   address,
+  //   uint256 id,
+  //   uint256 value,
+  //   bytes memory _data
+  // ) public whenNotPaused returns (bytes4) {
+  //   {
+  //     bytes4 dataSelector;
+  //     assembly {
+  //       dataSelector := mload(add(_data, 0x20))
+  //     }
+  //     if (dataSelector != AuctionFactory.innerCreateAuction.selector)
+  //       revert InvalidReceiveData();
+  //   }
+  //   assembly {
+  //     mstore(add(_data, 0x04), sub(mload(_data), 0x04))
+  //     _data := add(_data, 0x04)
+  //   }
+  //   (AuctionType auctionType, bytes memory auctionData) = abi.decode(_data, (AuctionType, bytes));
+  //   address[] memory nftAddresses = new address[](1);
+  //   uint[] memory nftIds = new uint[](1);
+  //   uint[] memory nftValues = new uint[](1);
+  //   nftAddresses[0] = msg.sender;
+  //   nftIds[0] = id;
+  //   nftValues[0] = value;
+  //   address newAuction = createNewAuction1155(auctionType, auctionData, operator, nftAddresses, nftIds, nftValues);
+  //   ongoingAuction[newAuction] = true;
+  //   emit AuctionCreated(newAuction, uint256(auctionType));
+  //   IERC1155(msg.sender).safeTransferFrom(address(this), newAuction, id, value, "");
 
-    return this.onERC1155Received.selector;
-  }
+  //   return this.onERC1155Received.selector;
+  // }
 
   function onERC1155BatchReceived(
     address operator,
@@ -300,5 +296,24 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
     require(ongoingAuction[msg.sender], "NOT_ONGOING_AUCTION");
     ongoingAuction[msg.sender] = false;
     emit AuctionFinalized(msg.sender, auctionType);
+  }
+  function bidAuctionInFactory(uint256 auctionType, address bidder, uint256 amount) 
+  whenNotPaused external {
+    require(ongoingAuction[msg.sender], "NOT_ONGOING_AUCTION");
+    emit BidAuction(msg.sender, auctionType, bidder, amount);
+  }
+  function updateAuctionInFactory(uint256 auctionType) whenNotPaused external {
+    require(ongoingAuction[msg.sender], "NOT_ONGOING_AUCTION");
+    emit UpdateAuction(msg.sender, auctionType);
+  }
+  function revealAuctionInFactory(uint256 auctionType, address revealer, uint256 actualAmount) 
+  whenNotPaused external {
+    require(ongoingAuction[msg.sender], "NOT_ONGOING_AUCTION");
+    emit RevealAuction(msg.sender, auctionType, revealer, actualAmount);
+  }
+  function startRevealAuctionInFactory(uint256 auctionType) 
+  whenNotPaused external {
+    require(ongoingAuction[msg.sender], "NOT_ONGOING_AUCTION");
+    emit RevealStarted(msg.sender, auctionType);
   }
 }
