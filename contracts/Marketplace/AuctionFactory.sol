@@ -9,16 +9,11 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/securit
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./IAuctionFactory.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
-import { VickreyAuction721 } from "./auction/VickreyAuction/VickreyAuction721.sol";
-import { VickreyAuction1155 } from "./auction/VickreyAuction/VickreyAuction1155.sol";
-import { EnglishAuction721 } from "./auction/EnglishAuction/EnglishAuction721.sol";
-import { EnglishAuction1155 } from "./auction/EnglishAuction/EnglishAuction1155.sol";
-import { DutchAuction721 } from "./auction/DutchAuction/DutchAuction721.sol";
-import { DutchAuction1155 } from "./auction/DutchAuction/DutchAuction1155.sol";
-import { SealedBidAuctionV1721 } from "./auction/SealedBidAuctionV1/SealedBidAuctionV1721.sol";
-import { SealedBidAuctionV11155 } from "./auction/SealedBidAuctionV1/SealedBidAuctionV11155.sol";
-import { SealedBidAuctionV2721 } from "./auction/SealedBidAuctionV2/SealedBidAuctionV2721.sol";
-import { SealedBidAuctionV21155 } from "./auction/SealedBidAuctionV2/SealedBidAuctionV21155.sol";
+import { VickreyAuction } from "./auction/VickreyAuction/VickreyAuction.sol";
+import { EnglishAuction } from "./auction/EnglishAuction/EnglishAuction.sol";
+import { DutchAuction } from "./auction/DutchAuction/DutchAuction.sol";
+import { SealedBidAuctionV1 } from "./auction/SealedBidAuctionV1/SealedBidAuctionV1.sol";
+import { SealedBidAuctionV2 } from "./auction/SealedBidAuctionV2/SealedBidAuctionV2.sol";
 
 contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFactory {
   mapping(AuctionType => address) public auctionImplementation;
@@ -54,6 +49,66 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
   function innerCreateAuction(AuctionType, bytes memory) external pure {
     revert NotCallable();
   }
+
+  function createNewAuction(
+    AuctionType auctionType, bytes memory auctionData, address operator, 
+    address[] memory nftAddresses, uint[] memory nftIds, uint[] memory nftValues
+  ) internal returns(address newAuction) {
+    newAuction = Clones.clone(auctionImplementation[auctionType]);
+    if(auctionType == AuctionType.DUTCHAUCTION) {
+      DutchParams memory creatorParams = abi.decode(auctionData, (DutchParams));
+      DutchAuction(payable(newAuction)).initialize(
+        operator,
+        address(this),
+        nftAddresses,
+        nftIds,
+        nftValues,
+        creatorParams
+      );
+    } else if(auctionType == AuctionType.ENGLISHAUCTION) {
+      EnglishParams memory creatorParams = abi.decode(auctionData, (EnglishParams));
+      EnglishAuction(payable(newAuction)).initialize(
+        operator,
+        address(this),
+        nftAddresses,
+        nftIds,
+        nftValues,
+        creatorParams
+      );
+    } else if(auctionType == AuctionType.VICKREYAUCTION) {
+      VickreyParams memory creatorParams = abi.decode(auctionData, (VickreyParams));
+      VickreyAuction(payable(newAuction)).initialize(
+        operator,
+        address(this),
+        nftAddresses,
+        nftIds,
+        nftValues,
+        creatorParams
+      );
+    } else if(auctionType == AuctionType.SEALEDBIDAUCTIONV1) {
+      VickreyParams memory creatorParams = abi.decode(auctionData, (VickreyParams));
+      SealedBidAuctionV1(payable(newAuction)).initialize(
+        operator,
+        address(this),
+        nftAddresses,
+        nftIds,
+        nftValues,
+        creatorParams
+      );
+    } else if(auctionType == AuctionType.SEALEDBIDAUCTIONV2) {
+      SealedBidV2Params memory creatorParams = abi.decode(auctionData, (SealedBidV2Params));
+      SealedBidAuctionV2(payable(newAuction)).initialize(
+        operator,
+        address(this),
+        nftAddresses,
+        nftIds,
+        nftValues,
+        creatorParams
+      );
+    } else {
+      revert InvalidAuctionType();
+    }
+  }
   // ERC721
   function onERC721Received(
     address operator,
@@ -74,159 +129,18 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
       _data := add(_data, 0x04)
     }
     (AuctionType auctionType, bytes memory auctionData) = abi.decode(_data, (AuctionType, bytes));
-    address newAuction = Clones.clone(auctionImplementation[auctionType]);
     address[] memory nftAddresses = new address[](1);
     uint[] memory nftIds = new uint[](1);
+    uint[] memory nftValues = new uint[](1);
     nftAddresses[0] = msg.sender;
     nftIds[0] = _tokenId;
-    if(auctionType == AuctionType.ENGLISHAUCTION721) {
-      EnglishParams memory creatorParams = abi.decode(auctionData, (EnglishParams));
-      EnglishAuction721(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        creatorParams
-      );
-    } else if(auctionType == AuctionType.VICKREYAUCTION721) {
-      VickreyParams memory params = abi.decode(auctionData, (VickreyParams));
-      VickreyAuction721(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        params
-      );
-    } else if(auctionType == AuctionType.DUTCHAUCTION721) {
-      DutchParams memory params = abi.decode(auctionData, (DutchParams));
-      DutchAuction721(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        params
-      );
-    } else if(auctionType == AuctionType.SEALEDBIDAUCTIONV1721) {
-      VickreyParams memory params = abi.decode(auctionData, (VickreyParams));
-      SealedBidAuctionV1721(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        params
-      );
-    } else if(auctionType == AuctionType.SEALEDBIDAUCTIONV2721) {
-      SealedBidV2Params memory params = abi.decode(auctionData, (SealedBidV2Params));
-      SealedBidAuctionV2721(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        params
-      );
-    } else {
-      revert InvalidAuctionType();
-    }
+    nftValues[0] = 0;
+    address newAuction = createNewAuction(auctionType, auctionData, operator, nftAddresses, nftIds, nftValues);
     ongoingAuction[newAuction] = true;
     emit AuctionCreated(newAuction, uint256(auctionType));
     IERC721(msg.sender).transferFrom(address(this), newAuction, _tokenId);
     return this.onERC721Received.selector;
   }
-
-  function createNewAuction1155(
-    AuctionType auctionType, bytes memory auctionData, address operator, 
-    address[] memory nftAddresses, uint[] memory nftIds, uint[] memory nftValues
-  ) internal returns(address newAuction) {
-    newAuction = Clones.clone(auctionImplementation[auctionType]);
-    if(auctionType == AuctionType.DUTCHAUCTION1155) {
-      DutchParams memory creatorParams = abi.decode(auctionData, (DutchParams));
-      DutchAuction1155(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        nftValues,
-        creatorParams
-      );
-    } else if(auctionType == AuctionType.ENGLISHAUCTION1155) {
-      EnglishParams memory creatorParams = abi.decode(auctionData, (EnglishParams));
-      EnglishAuction1155(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        nftValues,
-        creatorParams
-      );
-    } else if(auctionType == AuctionType.VICKREYAUCTION1155) {
-      VickreyParams memory creatorParams = abi.decode(auctionData, (VickreyParams));
-      VickreyAuction1155(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        nftValues,
-        creatorParams
-      );
-    } else if(auctionType == AuctionType.SEALEDBIDAUCTIONV11155) {
-      VickreyParams memory creatorParams = abi.decode(auctionData, (VickreyParams));
-      SealedBidAuctionV11155(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        nftValues,
-        creatorParams
-      );
-    } else if(auctionType == AuctionType.SEALEDBIDAUCTIONV21155) {
-      SealedBidV2Params memory creatorParams = abi.decode(auctionData, (SealedBidV2Params));
-      SealedBidAuctionV21155(payable(newAuction)).initialize(
-        operator,
-        address(this),
-        nftAddresses,
-        nftIds,
-        nftValues,
-        creatorParams
-      );
-    } else {
-      revert InvalidAuctionType();
-    }
-  }
-
-  // ERC1155 //!!!! Có thể xóa hàm này, chỉ dùng transfer batch
-  // function onERC1155Received(
-  //   address operator,
-  //   address,
-  //   uint256 id,
-  //   uint256 value,
-  //   bytes memory _data
-  // ) public whenNotPaused returns (bytes4) {
-  //   {
-  //     bytes4 dataSelector;
-  //     assembly {
-  //       dataSelector := mload(add(_data, 0x20))
-  //     }
-  //     if (dataSelector != AuctionFactory.innerCreateAuction.selector)
-  //       revert InvalidReceiveData();
-  //   }
-  //   assembly {
-  //     mstore(add(_data, 0x04), sub(mload(_data), 0x04))
-  //     _data := add(_data, 0x04)
-  //   }
-  //   (AuctionType auctionType, bytes memory auctionData) = abi.decode(_data, (AuctionType, bytes));
-  //   address[] memory nftAddresses = new address[](1);
-  //   uint[] memory nftIds = new uint[](1);
-  //   uint[] memory nftValues = new uint[](1);
-  //   nftAddresses[0] = msg.sender;
-  //   nftIds[0] = id;
-  //   nftValues[0] = value;
-  //   address newAuction = createNewAuction1155(auctionType, auctionData, operator, nftAddresses, nftIds, nftValues);
-  //   ongoingAuction[newAuction] = true;
-  //   emit AuctionCreated(newAuction, uint256(auctionType));
-  //   IERC1155(msg.sender).safeTransferFrom(address(this), newAuction, id, value, "");
-
-  //   return this.onERC1155Received.selector;
-  // }
 
   function onERC1155BatchReceived(
     address operator,
@@ -250,12 +164,45 @@ contract AuctionFactory is OwnableUpgradeable, PausableUpgradeable, IAuctionFact
     (AuctionType auctionType, bytes memory auctionData) = abi.decode(_data, (AuctionType, bytes));
     address[] memory nftAddresses = new address[](1);
     nftAddresses[0] = msg.sender;
-    address newAuction = createNewAuction1155(auctionType, auctionData, operator, nftAddresses, ids, values);
+    address newAuction = createNewAuction(auctionType, auctionData, operator, nftAddresses, ids, values);
     ongoingAuction[newAuction] = true;
     emit AuctionCreated(newAuction, uint256(auctionType));
     IERC1155(msg.sender).safeBatchTransferFrom(address(this), newAuction, ids, values, "");
-
     return this.onERC1155BatchReceived.selector;
+  }
+
+  function createBulkAuction(
+    address[] memory nftAddresses,
+    uint256[] memory ids,
+    uint256[] memory values,
+    bytes memory _data,
+    bool isOneContract
+  ) public whenNotPaused {
+    if(isOneContract) {
+      (AuctionType auctionType, bytes memory auctionData) = abi.decode(_data, (AuctionType, bytes));
+      address newAuction = createNewAuction(auctionType, auctionData, msg.sender, nftAddresses, ids, values);
+      ongoingAuction[newAuction] = true;
+      emit AuctionCreated(newAuction, uint256(auctionType));
+      for(uint i = 0; i < nftAddresses.length; i++) {
+        if(values[i] == 0) IERC721(nftAddresses[i]).transferFrom(msg.sender, newAuction, ids[i]);
+        else IERC1155(nftAddresses[i]).safeTransferFrom(msg.sender, newAuction, ids[i], values[i], "");
+      }
+    } else {
+      (AuctionType[] memory auctionType, bytes[] memory auctionData) = abi.decode(_data, (AuctionType[], bytes[]));
+      for(uint i = 0; i < nftAddresses.length; i++) {
+        address[] memory addresses = new address[](1);
+        uint256[] memory id = new uint256[](1);
+        uint256[] memory value = new uint256[](1);
+        addresses[0] = nftAddresses[i];
+        id[0] = ids[i];
+        value[0] = values[i];
+        address newAuction = createNewAuction(auctionType[i], auctionData[i], msg.sender, addresses, id, value);
+        ongoingAuction[newAuction] = true;
+        emit AuctionCreated(newAuction, uint256(auctionType[i]));
+        if(values[i] == 0) IERC721(nftAddresses[i]).transferFrom(msg.sender, newAuction, ids[i]);
+        else IERC1155(nftAddresses[i]).safeTransferFrom(msg.sender, newAuction, ids[i], values[i], "");
+      }
+    }
   }
 
   /*╔══════════════════════════════╗

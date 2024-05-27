@@ -44,7 +44,7 @@ abstract contract VickreyAuctionBase is BaseAuction {
   uint256 internal constant BID_EXTRACTOR_CODE_SIZE = 0x8;
   uint256 internal constant BID_EXTRACTOR_CODE_OFFSET = 0x18;
   uint256 constant WAD = 1e18;
-  uint256 internal constant SLASH_AMT = 0.1e18; // amount to slash for late reveal = 10%
+  uint256 internal constant SLASH_AMT = 0.1e18;
 
   receive() external payable {}
 
@@ -65,7 +65,6 @@ abstract contract VickreyAuctionBase is BaseAuction {
     ) = factory.vickreyAdminParams();
     basePrice = params.basePrice;
 
-    // Chỉ khi baseprice = 0 và có duy nhất 1 người bid mới k kích hoạt trả giá cao thứ 2 nữa
     sndBid = uint128(params.basePrice);
 
     require(params.bidDuration > mininumBidDuration, "Bid duration too small");
@@ -193,7 +192,6 @@ abstract contract VickreyAuctionBase is BaseAuction {
       return bidAddr;
     }
 
-    //!!! Mới fix là k lưu nếu là second vì sndprice cũng phải check
     if(topBidder != address(0)) {
       require(actualBid <= sndBid, "You may be the highest bidder or second highest bidder");
       bidderRefund = totalBid;
@@ -207,27 +205,27 @@ abstract contract VickreyAuctionBase is BaseAuction {
     revealAuctionFac(_bidder, actualBid);
   }
 
-  // !!! Not support server reveal batch yet
+  // Utility reveal function for server
   // Server call to save gas fee: only success if
   // Array should not be more than 40tx
   // First person must be highest bidder even in the contract, so server must sort first before calling
   // Check each tx is valid and the balance of create2 is > 0 by multicall
   // Remove all invalid proof and notify user
-  // function revealBatch(
-  //   address[] memory _bidder,
-  //   uint256[] memory _bid,
-  //   bytes32[] memory _subSalt,
-  //   uint256 _balAtSnapshot, 
-  //   EthereumDecoder.BlockHeader memory _header,
-  //   MPT.MerkleProof memory _accountDataProof
-  // ) external nonReentrant {
-  //   if (storedBlockHash == bytes32(0)) _startReveal();
-  //   if (revealStartTime + revealDuration < block.timestamp) revert RevealOver();
-  //   _reveal(_bidder[0], _bid[0], _subSalt[0], _balAtSnapshot, _header, _accountDataProof);
-  //   for (uint256 i = 1; i < _bidder.length; i++) {
-  //     _revealNoVerify(_bidder[i], _bid[i], _subSalt[i]);
-  //   }
-  // }
+  function revealBatch(
+    address[] memory _bidder,
+    uint256[] memory _bid,
+    bytes32[] memory _subSalt,
+    uint256 _balAtSnapshot, 
+    EthereumDecoder.BlockHeader memory _header,
+    MPT.MerkleProof memory _accountDataProof
+  ) external nonReentrant {
+    if (storedBlockHash == bytes32(0)) _startReveal();
+    if (revealStartTime + revealDuration < block.timestamp) revert RevealOver();
+    _reveal(_bidder[0], _bid[0], _subSalt[0], _balAtSnapshot, _header, _accountDataProof);
+    for (uint256 i = 1; i < _bidder.length; i++) {
+      _revealNoVerify(_bidder[i], _bid[i], _subSalt[i]);
+    }
+  }
 
   function lateReveal(address _bidder, uint256 _bid, bytes32 _subSalt) 
   external nonReentrant returns(address bidAddr) {
@@ -284,10 +282,8 @@ abstract contract VickreyAuctionBase is BaseAuction {
     }
   }
 
-
-  //!!!! Fix để k cho gọi claim win khi còn chưa reveal
   function ownerClaimNoBidder() public returns(bool){
-    if (revealStartTime != 0 && revealStartTime + revealDuration > block.timestamp) revert RevealNotOver();
+    if (revealStartTime != 0 && revealStartTime + revealDuration < block.timestamp) revert RevealNotOver();
     if(topBid == 0) {
       transferNFT(address(this), owner);
       finalizeFac();
@@ -363,7 +359,7 @@ abstract contract VickreyAuctionBase is BaseAuction {
   }
 
   function getAuctionInfo() external view
-  returns (address, uint256, uint256, uint256, uint256, uint256, address, uint256, uint256, bool) {  
+  returns (address, uint256, uint256, uint256, uint256, uint256, address, uint256, uint256) {  
     return (
       owner,
       basePrice,
@@ -373,48 +369,7 @@ abstract contract VickreyAuctionBase is BaseAuction {
       revealBlockNum,
       topBidder,
       topBid,
-      sndBid,
-      isClaimed //!!!! Bỏ claim đi
+      sndBid
     );
   }
-  // // Edge case: user reveal and still send ether to create2 contract, it will depend
-  // function isFirstOrHighest(
-  //   address _bidder,
-  //   uint256 _bid,
-  //   bytes32 _subSalt
-  // ) external view returns(bool) {
-  //   if(topBid == 0) {
-  //     return true;
-  //   }
-  //   uint256 bidPrice = getEstimatedBidPrice(_bidder, _bid, _subSalt);
-  //   if(bidPrice <= topBid && bidPrice > 0) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
-  // // Edge case: After user reveal, always come to 0, but sending ether to create2 contract, it will depends
-  // function getEstimatedBidPrice(
-  //   address _bidder,
-  //   uint256 _bid,
-  //   bytes32 _subSalt
-  // ) public view returns(uint256) {
-  //   (, address depositAddr) = getBidDepositAddr(
-  //     _bidder,
-  //     _bid,
-  //     _subSalt
-  //   );
-  //   return Math.min(_bid, address(depositAddr).balance);
-  // }
-  // function getRemainingBidTime() public view returns(uint256) {
-  //   return bidEndTime > block.timestamp ? bidEndTime - block.timestamp : 0;
-  // }
-  // function getRemainingRevealTime() public view returns(uint256) {
-  //   if(revealStartTime <= 0) {
-  //     return 0;
-  //   }
-  //   if(revealStartTime + revealDuration > block.timestamp){
-  //     return revealStartTime + revealDuration - block.timestamp;
-  //   }
-  //   return 0;
-  // }
 }

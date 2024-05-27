@@ -99,8 +99,8 @@ module.exports = {
     ganache: {
       url: "http://127.0.0.1:8545",
       accounts: [
-        "0x78a9e6792b45ea79a9faaa9915795992ddf0c82f0e354d6971f7c73fe9b62be7",
-        "0x891350a5bfeed0c9399e7dd488b6d3719098b02bd9a709d870a20a2fd2918ab8"
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
       ]
     },
     ganacheui: {

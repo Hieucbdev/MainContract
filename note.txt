@@ -1,4 +1,97 @@
-//!!!!!!!
--> Cần thêm tính năng tạo auction cho ERC1155 mà ở nhiều contracts khác nhau, hiện chỉ cho ở 1 contract
--> Cần thêm tính năng tạo auction batch 1 auction gồm nhiều NFTs
+-> 1 NFT 721
+-> 1 NFT 1155
+-> 1 list NFT 1155 cùng contract
+-> Multiple NFT mix loại
+=> Giới hạn 5
 
+
+
+Cơ chế verify 1 address có lượng eth là bao nhiêu trước khoảng thời gian nào:
+Input:
+header 
+accountdataproof 
+balance của account
+
+Contract lưu:
+block hash đích
+
+Các bước:
+Trước tiên chứng minh header truyền vào là đúng bằng cách tách các trường ra theo rlp rồi keccak256 thành blockhash, so với blockhash đích nếu trùng là đúng
+
+Header có stateroot, từ đó check được stateroot trong proof là hợp lệ. Tương tự thì balance hợp lệ là trường expectedValue. Tiếp theo check proof truyền vào là đúng là sẽ chứng minh được balance là đúng bằng cách dùng rlp tái tạo lại phải thoả mãn, vì nếu k thoả mãn, sẽ k thể dùng rlp với tập hợp các trường của proof như v được
+
+// Master tất cả r viết tiếp
+Trong proof bây giờ có:
+1) expectedRoot
+Trước tiên là có 4 loại trie trong blockchain là storage, receipt, transaction trie, global state trie
+Tương tự có 4 loại root là state root, storage root, transaction root, receipt root.
+
+Các thông tin về root được nằm trong mỗi block. Nên giao thức getBlock có thể lấy được thông tin này của block bất kỳ: receiptsRoot, stateRoot, transactionsRoot
+
+eth_getProof giao thức cho phép lấy proof: storageProof, accountProof
+
+AccountProof là cái mới: trả ra 1 mảng, phần tử đầu tiên là stateroot, sau đó là các SHA(address).
+
+
+
+
+
+
+
+
+proof là 1 mảng các proof
+keyIndex
+ProofIndex
+ExpectedValue
+key
+
+
+
+Thuật toán để nó đi từ root tới leaf là tìm từ từ đó
+
+
+
+
+
+save vickrey check:
+
+  // // Edge case: user reveal and still send ether to create2 contract, it will depend
+  // function isFirstOrHighest(
+  //   address _bidder,
+  //   uint256 _bid,
+  //   bytes32 _subSalt
+  // ) external view returns(bool) {
+  //   if(topBid == 0) {
+  //     return true;
+  //   }
+  //   uint256 bidPrice = getEstimatedBidPrice(_bidder, _bid, _subSalt);
+  //   if(bidPrice <= topBid && bidPrice > 0) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
+  // // Edge case: After user reveal, always come to 0, but sending ether to create2 contract, it will depends
+  // function getEstimatedBidPrice(
+  //   address _bidder,
+  //   uint256 _bid,
+  //   bytes32 _subSalt
+  // ) public view returns(uint256) {
+  //   (, address depositAddr) = getBidDepositAddr(
+  //     _bidder,
+  //     _bid,
+  //     _subSalt
+  //   );
+  //   return Math.min(_bid, address(depositAddr).balance);
+  // }
+  // function getRemainingBidTime() public view returns(uint256) {
+  //   return bidEndTime > block.timestamp ? bidEndTime - block.timestamp : 0;
+  // }
+  // function getRemainingRevealTime() public view returns(uint256) {
+  //   if(revealStartTime <= 0) {
+  //     return 0;
+  //   }
+  //   if(revealStartTime + revealDuration > block.timestamp){
+  //     return revealStartTime + revealDuration - block.timestamp;
+  //   }
+  //   return 0;
+  // }

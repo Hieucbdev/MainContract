@@ -108,17 +108,9 @@ abstract contract DutchAuctionBase is Ownable, BaseAuction {
   /*╔══════════════════════════════╗
     ║            GETTERS           ║
     ╚══════════════════════════════╝*/
-  // Formula for frontend
-  // function getCurrentStepData() public view 
-  // returns (uint256 currentPrice, uint256 currentRemainingTime, uint256 currentStep) 
-  // {
-  //   currentStep = Math.min(((block.timestamp - startingTime) / stepDuration) + 1, numberOfStep);
-  //   currentPrice = startingPrice - (currentStep - 1) * ((startingPrice - minimumPrice) / numberOfStep);
-  //   currentRemainingTime = stepDuration - ((block.timestamp - startingTime) % stepDuration);
-  // }
   function getAuctionInfo() external view 
-  returns(uint256, uint256, uint256, uint256, address, uint256, bool, address) {
+  returns(uint256, uint256, uint256, uint256, address, uint256, address) {
     return (
-      minimumPrice, startingPrice, numberOfStep, stepDuration, paymentToken, startingTime, isEnded, owner());
+      minimumPrice, startingPrice, numberOfStep, stepDuration, paymentToken, startingTime, owner());
   }
 }

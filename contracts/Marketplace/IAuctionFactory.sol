@@ -41,16 +41,11 @@ interface IAuctionFactory {
     ║      ENUM AND STRUCT       ║
     ╚════════════════════════════╝*/
   enum AuctionType {
-    ENGLISHAUCTION721,
-    ENGLISHAUCTION1155,
-    VICKREYAUCTION721,
-    VICKREYAUCTION1155,
-    DUTCHAUCTION721,
-    DUTCHAUCTION1155,
-    SEALEDBIDAUCTIONV1721,
-    SEALEDBIDAUCTIONV11155,
-    SEALEDBIDAUCTIONV2721,
-    SEALEDBIDAUCTIONV21155,
+    ENGLISHAUCTION,
+    VICKREYAUCTION,
+    DUTCHAUCTION,
+    SEALEDBIDAUCTIONV1,
+    SEALEDBIDAUCTIONV2,
     OTHERAUCTION1,
     OTHERAUCTION2,
     OTHERAUCTION3,
@@ -65,7 +60,7 @@ interface IAuctionFactory {
   struct VickreyParamsAdmin {
     uint256 mininumBidDuration; // default 1800 for 30m
     uint256 minimumRevealDuration; // default 1800 for 30m
-    address VICKREY_UTILITIES;
+    address VICKREY_UTILITIES; //!!!!! Trường này nên có thể update bởi developer
   }
   struct EnglishParamsAdmin {
     uint256 minimumRemainingTime; // default 600 for 10p

@@ -6,10 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:ganachechain": "ganache --account=\"0x78a9e6792b45ea79a9faaa9915795992ddf0c82f0e354d6971f7c73fe9b62be7,1000000000000000000000\" --account=\"0x891350a5bfeed0c9399e7dd488b6d3719098b02bd9a709d870a20a2fd2918ab8,1000000000000000000000\"",
+    "deployganache": "npx hardhat run --network ganache ./scriptsv4/deploy.js",
+    "testganache": "npx hardhat run --network ganache ./scriptsv4/createauction.js",
+    "upgradeganache": "npx hardhat run --network ganache ./scriptsv4/deployupgrade.js",
     "deployganacheui": "npx hardhat run --network ganacheui ./test/deploy.js",
-    "deploysepolia": "npx hardhat run --network sepolia ./scriptsv2/update.js",
-    "updatesepolia": "npx hardhat run --network sepolia ./scripts/update3.js",
-    "createauction": "npx hardhat run --network sepolia ./scripts/createauction.js"
+    "deploysepolia": "npx hardhat run --network sepolia ./scriptsv3/deploy.js",
+    "updatesepolia": "npx hardhat run --network sepolia ./scriptsv5/update.js",
+    "createauction": "npx hardhat run --network sepolia ./scriptsv3/createauction.js",
+    "upgradesepolia": "npx hardhat run --network sepolia ./scriptsv3/deployupgrade.js"
   },
   "author": "",
   "license": "ISC",

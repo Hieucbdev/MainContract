@@ -63,7 +63,7 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
     finalizeFac();
   }
 
-  function _editAuction(uint256 _newPrice, uint256 _newDuration) internal {
+  function _editAuction(uint256 _newPrice, uint256 _newDuration, address _paymentToken) internal {
     if(_newDuration != 0){
       require(startTime + _newDuration > block.timestamp, "New duration too short");
       endTime = startTime + _newDuration;
@@ -72,14 +72,12 @@ abstract contract EnglishAuctionBase is Ownable, BaseAuction {
       startingBid = _newPrice;
       currentBid = _newPrice;
     }
+    paymentToken = _paymentToken;
     updateAuctionFac();
   }
-  //!!!!!! Nên cho phép edit cả loại token nữa
-  //!!!!!! Nên mở rộng cho phép edit miễn là chưa có ai bid, kể cả đã end, khi đó người dùng nhập vào thời gian đích để nới rộng endTime ra cho auction
-  function editAuction(uint256 _newPrice, uint256 _newDuration) external nonReentrant onlyOwner {
+  function editAuction(uint256 _newPrice, uint256 _newDuration, address _paymentToken) external nonReentrant onlyOwner {
     require(bidSteps == 0, "Cannot edit ongoing auction");
-    require(block.timestamp < endTime, "Cannot edit ended auction");
-    _editAuction(_newPrice, _newDuration);
+    _editAuction(_newPrice, _newDuration, _paymentToken);
   }
 
   /*╔═════════════════════════════╗

@@ -26,6 +26,7 @@ abstract contract SealedBidAuctionV2Base is Ownable, BaseAuction {
   bool public isEnded;
 
   receive() external payable {}
+  function updateAuctionFac() internal virtual;
 
   /*╔═══════════════════════╗
     ║      CONSTRUCTOR      ║
@@ -66,7 +67,6 @@ abstract contract SealedBidAuctionV2Base is Ownable, BaseAuction {
     ╚═════════════════╝*/
   function cancelAuction() external onlyOwner {
     require(
-      //!!!! Sửa để auction end thì vẫn cancel được nếu chưa có ai reveal trước đó
       bidStep == 0 || (revealStep == 0 && block.timestamp > bidEndTime + revealDuration),
       "Cannot cancel ongoing auction"
     );
@@ -78,12 +78,21 @@ abstract contract SealedBidAuctionV2Base is Ownable, BaseAuction {
   /*╔══════════════════════╗
     ║       REVEEAL        ║
     ╚══════════════════════╝*/
+
+  function claimWin() public nonReentrant {
+    require(isEnded == false, "Auction has been claimed");
+    isEnded = true;
+    require(block.timestamp > bidEndTime + revealDuration, "Not time to claim");
+    require(currentBidder != address(0), "No one revealed");
+    transferNFT(address(this), currentBidder);
+    sendTokenFromThisContractTo(owner(), currentBid);
+    finalizeFac();
+  }
   function reveal(
     uint256 price,
     bytes32 salt
   ) external payable nonReentrant {
     require(
-      //!!!!! Sửa để nếu quá hạn mà chưa có ai reveal thì vẫn được reveal nếu chưa cancel
       isEnded == false && block.timestamp > bidEndTime && (
         revealStep == 0 || ( block.timestamp <= bidEndTime + revealDuration )
       ),
@@ -93,7 +102,6 @@ abstract contract SealedBidAuctionV2Base is Ownable, BaseAuction {
       myPriceHash[msg.sender] == keccak256(abi.encodePacked(price, salt)), 
       "Price hash invalid"
     );
-    //!!!! Dùng starting Price nè!
     require(price > currentBid && price > basePrice, "Not highest bidder");
     if(paymentToken == address(0)){
       require(msg.value == price, "Price not match");
@@ -112,35 +120,35 @@ abstract contract SealedBidAuctionV2Base is Ownable, BaseAuction {
     currentBid = price;
     revealStep++;
     revealAuctionFac(currentBidder, currentBid);
-    //!!!!! Tự động claim win nếu là người đầu tiên quá hạn
     if(block.timestamp > bidEndTime + revealDuration && revealStep == 1){
       claimWin();
     }
   }
 
-  function claimWin() external nonReentrant {
-    require(isEnded == false, "Auction has been claimed"); //!!!! Mới sửa
-    isEnded = true;
-    require(block.timestamp > bidEndTime + revealDuration, "Not time to claim");
-    require(currentBidder != address(0), "No one revealed");
-    transferNFT(address(this), currentBidder);
-    sendTokenFromThisContractTo(owner(), currentBid);
-    finalizeFac();
+  function _editAuction(uint256 _newBasePrice, uint256 _newbidDuration, address _paymentToken) internal {
+    if(_newbidDuration != 0){
+      require(startTime + _newbidDuration > block.timestamp, "New duration too short");
+      bidEndTime = startTime + _newbidDuration;
+    }
+    if(_newBasePrice != 0){
+      basePrice = _newBasePrice;
+    }
+    paymentToken = _paymentToken;
+    updateAuctionFac();
   }
+  function editAuction(uint256 _newBasePrice, uint256 _newbidDuration, address _paymentToken) external nonReentrant onlyOwner {
+    require(
+      bidStep == 0 || (revealStep == 0 && block.timestamp > bidEndTime + revealDuration),
+      "Cannot edit ongoing auction"
+    );
+    _editAuction(_newBasePrice, _newbidDuration, _paymentToken);
+  }
+  
   /*  ╔═════════════════════════╗
       ║        UTILITIES        ║
       ╚═════════════════════════╝ */  
-  // function getRemainingBidTime() public view returns(uint256) {
-  //   return bidEndTime > block.timestamp ? bidEndTime - block.timestamp : 0;
-  // }
-  // function getRemainingRevealTime() public view returns(uint256) {
-  //   if(bidEndTime > block.timestamp || bidEndTime + revealDuration < block.timestamp){
-  //     return 0;
-  //   }
-  //   return bidEndTime + revealDuration - block.timestamp;
-  // }
   function getAuctionInfo() external view 
-    returns (address, uint256, uint256, uint256, uint256, address, uint256, uint256, uint256, address, bool) 
+    returns (address, uint256, uint256, uint256, uint256, address, uint256, uint256, uint256, address) 
   {
     return (
       owner(),
@@ -152,8 +160,7 @@ abstract contract SealedBidAuctionV2Base is Ownable, BaseAuction {
       bidStep,
       revealStep,
       currentBid,
-      currentBidder,
-      isEnded //!!!! Bỏ, dùng status của graph đi
+      currentBidder
     );
   }
 
